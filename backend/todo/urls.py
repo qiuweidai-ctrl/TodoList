@@ -1,8 +1,10 @@
-from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
+
+from . import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/', include('api.urls')),
-    path('api-auth/', include('rest_framework.urls')),
+    path('', views.todo_list, name='todo_list'),
+    path('<int:todo_id>/toggle/', views.toggle, name='toggle'),
+    path('<int:todo_id>/delete/', views.todo_delete, name='delete'),
+    path('<int:todo_id>/edit/', views.todo_edit, name='edit'),
 ]

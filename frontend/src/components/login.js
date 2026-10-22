@@ -1,66 +1,55 @@
-import React, { useState } from 'react';
-import Form from 'react-bootstrap/Form';
-import Container from 'react-bootstrap/Container';
-import Button from 'react-bootstrap/Button';
+import React, { useState } from "react";
+import Form from "react-bootstrap/Form";
+import Container from "react-bootstrap/Container";
+import Button from "react-bootstrap/Button";
 import { useNavigate } from "react-router-dom";
 
-// 登录页面组件：使用React-Bootstrap表单
+// 登录页：调用 App 传下来的 login(username, password)
 const Login = (props) => {
-  // 路由跳转
   const navigate = useNavigate();
-  // 用户名输入框状态
   const [username, setUsername] = useState("");
-  // 密码输入框状态
   const [password, setPassword] = useState("");
 
-  // 用户名输入变化时更新状态
-  const onChangeUsername = e => {
-    const username = e.target.value;
-    setUsername(username);
-  }
-
-  // 密码输入变化时更新状态
-  const onChangePassword = e => {
-    const password = e.target.value;
-    setPassword(password);
-  }
-
-  // 登录按钮点击：调用父组件传入的login函数
-  const login = () => {
-    props.login({ username: username, password: password });
-    // 登录成功后跳转到首页
-    navigate('/');
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const success = await props.login(username, password);
+    if (success) {
+      navigate("/");
+    }
+  };
 
   return (
-    <Container>
-      <Form>
-        <Form.Group className="mb-3">
+    <Container style={{ maxWidth: "420px", marginTop: "3rem" }}>
+      <h2 className="mb-4">Login</h2>
+      <Form onSubmit={handleSubmit}>
+        <Form.Group className="mb-3" controlId="loginUsername">
           <Form.Label>Username</Form.Label>
           <Form.Control
             type="text"
             placeholder="Enter username"
             value={username}
-            onChange={onChangeUsername}
+            onChange={(e) => setUsername(e.target.value)}
+            required
           />
         </Form.Group>
 
-        <Form.Group className="mb-3">
+        <Form.Group className="mb-3" controlId="loginPassword">
           <Form.Label>Password</Form.Label>
           <Form.Control
             type="password"
             placeholder="Enter password"
             value={password}
-            onChange={onChangePassword}
+            onChange={(e) => setPassword(e.target.value)}
+            required
           />
         </Form.Group>
 
-        <Button variant="primary" onClick={login}>
+        <Button variant="primary" type="submit">
           Login
         </Button>
       </Form>
     </Container>
   );
-}
+};
 
 export default Login;

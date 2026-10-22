@@ -1,83 +1,108 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
-import { Container, Form, Button, Card } from 'react-bootstrap';
-import TodosList from './components/todos-list';
-import AddTodo from './components/add-todo';
+import React, { useState } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+  Navigate,
+} from "react-router-dom";
+import { Container, Nav, Navbar, Button } from "react-bootstrap";
 
-const API_URL = 'http://127.0.0.1:8000/api';
+import TodoDataService from "./services/todos";
+import Login from "./components/login";
+import Signup from "./components/signup";
+import TodosList from "./components/todos-list";
+import AddTodo from "./components/add-todo";
+import Todo from "./components/todo";
 
 function App() {
-  const [token, setToken] = useState(localStorage.getItem('token'));
-  const [username, setUsername] = useState(localStorage.getItem('username'));
+  // token 存在 localStorage，刷新页面不会掉登录
+  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [username, setUsername] = useState(localStorage.getItem("username"));
 
-  const [loginUser, setLoginUser] = useState('');
-  const [loginPwd, setLoginPwd] = useState('');
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const login = async (user, password) => {
     try {
-      const res = await fetch(`${API_URL}/login/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: loginUser, password: loginPwd })
-      });
-      const data = await res.json();
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('username', loginUser);
-      setToken(data.token);
-      setUsername(loginUser);
+      const response = await TodoDataService.login(user, password);
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("username", response.data.username || user);
+      setToken(response.data.token);
+      setUsername(response.data.username || user);
+      return true;
     } catch (err) {
-      alert('Login failed');
+      const msg = err?.response?.data?.non_field_errors?.[0];
+      alert("Login failed: " + (msg || "wrong username or password"));
+      return false;
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
+  const signup = async (user, password) => {
+    try {
+      await TodoDataService.signup(user, password);
+    } catch (err) {
+      alert("Sign up failed: " + (err?.response?.data?.error || err.message));
+      return false;
+    }
+    // 注册成功直接登录
+    return login(user, password);
+  };
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
     setToken(null);
     setUsername(null);
   };
 
-  const LoginPage = () => (
-    <Container className="mt-4" style={{ maxWidth: "500px" }}>
-      <Card className="p-4">
-        <h2>Login</h2>
-        <Form onSubmit={handleLogin}>
-          <Form.Group className="mb-3">
-            <Form.Label>Username</Form.Label>
-            <Form.Control value={loginUser} onChange={e => setLoginUser(e.target.value)} />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Password</Form.Label>
-            <Form.Control type="password" value={loginPwd} onChange={e => setLoginPwd(e.target.value)} />
-          </Form.Group>
-          <Button type="submit" variant="primary">Login</Button>
-        </Form>
-      </Card>
-    </Container>
-  );
-
-  const NavBar = () => (
-    <div className="bg-primary p-3 mb-4 text-white d-flex gap-4 align-items-center">
-      <h4 className="mb-0 text-white">TodosApp</h4>
-      <Link to="/todos" className="text-white">Todos</Link>
-      {token ?
-        <Button variant="light" size="sm" onClick={handleLogout}>Logout({username})</Button>
-        : <Link to="/login" className="text-white">Login</Link>
-      }
-    </div>
-  );
-
   return (
     <Router>
-      <NavBar />
-      <Container>
+      <Navbar bg="dark" variant="dark" expand="lg">
+        <Container>
+          <Navbar.Brand as={Link} to="/">
+            Todo App
+          </Navbar.Brand>
+          <Navbar.Toggle />
+          <Navbar.Collapse>
+            <Nav className="ms-auto align-items-center">
+              {token ? (
+                <>
+                  <Nav.Link as={Link} to="/">Home</Nav.Link>
+                  <Nav.Link as={Link} to="/add">Add Task</Nav.Link>
+                  <Navbar.Text className="mx-3">{username}</Navbar.Text>
+                  <Button variant="outline-light" size="sm" onClick={logout}>
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Nav.Link as={Link} to="/login">Login</Nav.Link>
+                  <Nav.Link as={Link} to="/signup">Sign up</Nav.Link>
+                </>
+              )}
+            </Nav>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
+
+      <Container className="mt-4">
         <Routes>
-          <Route path="/login" element={token ? <Navigate to="/todos" /> : <LoginPage />} />
-          <Route path="/todos" element={<TodosList token={token} />} />
-          <Route path="/todos/create" element={<AddTodo token={token} />} />
-          <Route path="/todos/:id" element={<AddTodo token={token} />} />
-          <Route path="*" element={<Navigate to="/todos" />} />
+          <Route
+            path="/login"
+            element={token ? <Navigate to="/" replace /> : <Login login={login} />}
+          />
+          <Route
+            path="/signup"
+            element={token ? <Navigate to="/" replace /> : <Signup signup={signup} />}
+          />
+          <Route path="/" element={<TodosList token={token} />} />
+          <Route
+            path="/add"
+            element={token ? <AddTodo token={token} /> : <Navigate to="/login" replace />}
+          />
+          <Route
+            path="/todos/:id"
+            element={token ? <Todo token={token} /> : <Navigate to="/login" replace />}
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Container>
     </Router>
