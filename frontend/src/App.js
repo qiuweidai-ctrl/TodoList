@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import { Container, Nav, Navbar, Button } from "react-bootstrap";
 
-import TodoDataService from "./services/todos";
+import TodoDataService, { API_URL } from "./services/todos";
 import Login from "./components/login";
 import Signup from "./components/signup";
 import TodosList from "./components/todos-list";
@@ -20,6 +20,13 @@ function App() {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [username, setUsername] = useState(localStorage.getItem("username"));
 
+  // 请求根本没到后端（后端没启动、地址错、或被 CORS 拦下）时给一条可操作的提示
+  const networkHint = (action) =>
+    `${action} failed: cannot reach the backend at ${API_URL}\n\n` +
+    `1) Is "python manage.py runserver" running?\n` +
+    `2) Is ${window.location.origin} allowed by CORS?\n` +
+    `   (the dev server allows any localhost port when DEBUG=True)`;
+
   const login = async (user, password) => {
     try {
       const response = await TodoDataService.login(user, password);
@@ -29,8 +36,14 @@ function App() {
       setUsername(response.data.username || user);
       return true;
     } catch (err) {
-      const msg = err?.response?.data?.non_field_errors?.[0];
-      alert("Login failed: " + (msg || "wrong username or password"));
+      if (!err.response) {
+        alert(networkHint("Login"));
+      } else if (err.response.status === 400) {
+        const msg = err.response.data?.non_field_errors?.[0];
+        alert("Login failed: " + (msg || "wrong username or password"));
+      } else {
+        alert("Login failed: HTTP " + err.response.status);
+      }
       return false;
     }
   };
@@ -39,7 +52,16 @@ function App() {
     try {
       await TodoDataService.signup(user, password);
     } catch (err) {
-      alert("Sign up failed: " + (err?.response?.data?.error || err.message));
+      if (!err.response) {
+        alert(networkHint("Sign up"));
+      } else {
+        alert(
+          "Sign up failed: " +
+            (err.response.data?.error ||
+              err.response.data?.username?.[0] ||
+              "HTTP " + err.response.status)
+        );
+      }
       return false;
     }
     // 注册成功直接登录

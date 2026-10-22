@@ -113,6 +113,7 @@ npm run build                       # 生产构建
 
 ## 常见问题
 
+- **登录失败 / 提示 “wrong username or password”，但密码没错**：多半是前端换了端口。3000 被占用时 CRA 会自动用 3001、3002……，而旧的白名单只写了 3000，浏览器会因跨域拿不到响应。`DEBUG=True` 时后端已放行 `localhost` / `127.0.0.1` 的任意端口；部署环境请显式配置 `DJANGO_CORS_ORIGINS`。
 - **登录 404**：确认后端地址与 `/api/api-token-auth/` 一致，且 `runserver` 已启动。
 - **浏览器控制台 CORS 报错**：把前端地址加入 `DJANGO_CORS_ORIGINS`。
 - **接口 401**：请求头缺少 `Authorization: Token <token>`，或 token 已被删除。

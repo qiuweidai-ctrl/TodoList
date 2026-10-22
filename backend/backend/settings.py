@@ -152,3 +152,12 @@ CORS_ALLOWED_ORIGINS = env_list(
     "DJANGO_CORS_ORIGINS",
     "http://localhost:3000,http://127.0.0.1:3000",
 )
+
+# 开发时 CRA 发现 3000 被占用会自动换到 3001、3002……，
+# 如果白名单只写死 3000，浏览器就会因为跨域被拦而报“登录失败”，很难排查。
+# 所以 DEBUG 模式下放行 localhost / 127.0.0.1 的任意端口。
+if DEBUG:
+    CORS_ALLOWED_ORIGIN_REGEXES = [
+        r"^http://localhost:\d+$",
+        r"^http://127\.0\.0\.1:\d+$",
+    ]

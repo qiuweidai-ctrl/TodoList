@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // 后端地址：优先读环境变量 REACT_APP_API_URL（部署时用），否则本地 8000 端口
-const API_URL = (
+export const API_URL = (
   process.env.REACT_APP_API_URL || "http://127.0.0.1:8000/api"
 ).replace(/\/+$/, "");
 
