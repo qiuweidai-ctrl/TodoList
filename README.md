@@ -1,58 +1,59 @@
 # TodoList
 
-Django REST Framework + React 的全栈任务管理应用（Practical 1–17 的完整项目）。
+A full-stack todo application built with Django REST Framework and React
+(complete project for Practicals 1–17).
 
-- 后端：Django + DRF，Token 认证，SQLite
-- 前端：React 18 + React Router 6 + React-Bootstrap + Axios
+- **Backend:** Django + DRF, token authentication, SQLite
+- **Frontend:** React 18 + React Router 6 + React-Bootstrap + Axios
 
-## 线上地址
+## Live deployment
 
-| 部分 | 地址 |
+| Part | URL |
 | --- | --- |
-| 前端（Netlify） | https://venerable-entremet-f4ed6f.netlify.app |
-| 后端（PythonAnywhere） | https://qiuweidai.pythonanywhere.com |
-| 后台管理 | https://qiuweidai.pythonanywhere.com/admin/ |
+| Frontend (Netlify) | https://venerable-entremet-f4ed6f.netlify.app |
+| Backend (PythonAnywhere) | https://qiuweidai.pythonanywhere.com |
+| Admin panel | https://qiuweidai.pythonanywhere.com/admin/ |
 
-部署步骤见 [DEPLOY.md](DEPLOY.md)。
+Step-by-step deployment instructions: [DEPLOY.md](DEPLOY.md).
 
-## 目录结构
+## Project structure
 
 ```
 TodoList/
-├── backend/               Django 项目
+├── backend/               Django project
 │   ├── backend/           settings / urls / wsgi
-│   ├── api/               REST 接口（views / serializers / urls / 测试）
-│   ├── todo/              Todo 模型 + Django 后台 + 旧的模板页面
-│   ├── scripts/api_demo.py  命令行冒烟测试（纯标准库）
+│   ├── api/               REST endpoints (views, serializers, urls, tests)
+│   ├── todo/              Todo model, Django admin, legacy template views
+│   ├── scripts/api_demo.py  command-line smoke test (stdlib only)
 │   └── manage.py
-├── frontend/              React 前端
+├── frontend/              React app
 │   └── src/
-│       ├── App.js         路由与登录状态
+│       ├── App.js         routing and login state
 │       ├── components/    login / signup / todos-list / add-todo / todo
-│       └── services/      axios 封装的 API 调用
-└── todo_venv/             本地虚拟环境（不入库）
+│       └── services/      axios wrappers around the API
+└── todo_venv/             local virtualenv (not committed)
 ```
 
-## 本地运行
+## Running locally
 
-### 1. 后端
+### 1. Backend
 
 ```bash
 cd backend
-# 首次：创建并激活虚拟环境
+# First time only: create and activate a virtualenv
 python -m venv ../todo_venv
 ../todo_venv/Scripts/activate        # Windows
 # source ../todo_venv/bin/activate   # macOS / Linux
 
 pip install -r requirements.txt
 python manage.py migrate
-python manage.py createsuperuser     # 可选，用于 /admin/
+python manage.py createsuperuser     # optional, for /admin/
 python manage.py runserver
 ```
 
-后端地址：<http://127.0.0.1:8000>
+Backend runs at <http://127.0.0.1:8000>.
 
-### 2. 前端
+### 2. Frontend
 
 ```bash
 cd frontend
@@ -60,77 +61,90 @@ npm install
 npm start
 ```
 
-前端地址：<http://127.0.0.1:3000>，浏览器打开后先注册账号再使用。
+Frontend runs at <http://127.0.0.1:3000>. Sign up for an account before using it.
 
-## API 一览
+## API reference
 
-| 方法 | 路径 | 说明 |
+| Method | Path | Description |
 | --- | --- | --- |
-| POST | `/api/signup/` | 注册，返回 `token` |
-| POST | `/api/api-token-auth/` | 登录，返回 `token`（别名 `/api/token/`） |
-| GET | `/api/todos/` | 当前用户的任务列表 |
-| POST | `/api/todos/` | 新建任务（`owner` 由后端填充） |
-| GET | `/api/todos/<id>/` | 单条任务 |
-| PUT / PATCH | `/api/todos/<id>/` | 修改任务 |
-| DELETE | `/api/todos/<id>/` | 删除任务 |
-| PUT | `/api/todos/<id>/complete/` | 切换完成状态 |
+| POST | `/api/signup/` | Register a user, returns a `token` |
+| POST | `/api/api-token-auth/` | Log in, returns a `token` (alias: `/api/token/`) |
+| GET | `/api/todos/` | List the current user's todos |
+| POST | `/api/todos/` | Create a todo (`owner` is set by the backend) |
+| GET | `/api/todos/<id>/` | Retrieve one todo |
+| PUT / PATCH | `/api/todos/<id>/` | Update a todo |
+| DELETE | `/api/todos/<id>/` | Delete a todo |
+| PUT | `/api/todos/<id>/complete/` | Toggle the completed flag |
 
-除注册和登录外，所有请求都要带请求头：`Authorization: Token <token>`。
+Every request except signup and login must send `Authorization: Token <token>`.
 
-任务字段：`id`、`title`、`memo`、`is_completed`、`created_time`。
+Todo fields: `id`, `title`, `memo`, `is_completed`, `created_time`.
 
-## 测试
+## Tests
 
 ```bash
 cd backend
-python manage.py test api -v 2      # 11 个接口回归测试
+python manage.py test api -v 2      # 11 API regression tests
 
-# 后端跑起来之后，再跑命令行冒烟测试
+# with the backend running, also try the command-line smoke test
 python scripts/api_demo.py
 
 cd ../frontend
-CI=true npm test                    # 前端组件测试
-npm run build                       # 生产构建
+CI=true npm test                    # component test
+npm run build                       # production build
 ```
 
-## 配置（环境变量 / backend/.env）
+## Configuration (environment variables / backend/.env)
 
-后端所有环境相关配置都从环境变量读取，也支持 `backend/.env`（参考 `backend/.env.example`）：
+All environment-specific backend settings come from environment variables;
+`backend/.env` is also supported (see `backend/.env.example`):
 
-| 变量 | 默认值 | 说明 |
+| Variable | Default | Description |
 | --- | --- | --- |
-| `DJANGO_SECRET_KEY` | 开发用占位值 | 部署前必须换成随机值 |
-| `DJANGO_DEBUG` | `True` | 部署时设为 `False` |
-| `DJANGO_ALLOWED_HOSTS` | `127.0.0.1,localhost` | 逗号分隔 |
-| `DJANGO_CORS_ORIGINS` | `localhost:3000,127.0.0.1:3000` | 前端地址白名单 |
-| `DJANGO_CSRF_TRUSTED_ORIGINS` | 空 | 同域部署时需要 |
+| `DJANGO_SECRET_KEY` | dev placeholder | Must be replaced before deploying |
+| `DJANGO_DEBUG` | `True` | Set to `False` in production |
+| `DJANGO_ALLOWED_HOSTS` | `127.0.0.1,localhost` | Comma separated |
+| `DJANGO_CORS_ORIGINS` | `localhost:3000,127.0.0.1:3000` | Frontend origin whitelist |
+| `DJANGO_CSRF_TRUSTED_ORIGINS` | empty | Needed for same-origin deployments |
 
-前端 API 地址通过 `REACT_APP_API_URL` 配置（参考 `frontend/.env.example`），不设置时默认 `http://127.0.0.1:8000/api`。
+The frontend API address is configured with `REACT_APP_API_URL`
+(see `frontend/.env.example`); it defaults to `http://127.0.0.1:8000/api`.
 
-## 部署（Practical 13–17）
+## Deployment (Practicals 13–17)
 
-完整的部署步骤（PythonAnywhere 后端 + Netlify 前端 + CORS 打通）见 **[DEPLOY.md](DEPLOY.md)**。
+Full instructions (PythonAnywhere backend, Netlify frontend, CORS) are in
+**[DEPLOY.md](DEPLOY.md)**.
 
-速览：
+Quick overview:
 
-1. 代码推到 GitHub（本仓库）。
-2. PythonAnywhere Bash 里 `git clone` 仓库，创建 virtualenv 并 `pip install -r backend/requirements.txt`。
-3. Web 标签页新建 Web App，选 **Manual configuration**（不要选 Django），Python 版本与 virtualenv 一致。
-4. Source code / Working directory 都填 `.../TodoList/backend`。
-5. WSGI 文件里指向 `backend.wsgi`，并设置环境变量：
+1. Push the code to GitHub (this repository).
+2. In a PythonAnywhere Bash console: `git clone` the repo, create a virtualenv
+   and run `pip install -r backend/requirements.txt`.
+3. On the Web tab create a new Web App and choose **Manual configuration**
+   (not the Django option); pick the same Python version as the virtualenv.
+4. Set both Source code and Working directory to `.../TodoList/backend`.
+5. Point the WSGI file at `backend.wsgi` and set the environment variables:
    ```python
-   os.environ["DJANGO_SECRET_KEY"] = "生成的随机密钥"
+   os.environ["DJANGO_SECRET_KEY"] = "a generated random key"
    os.environ["DJANGO_DEBUG"] = "False"
    os.environ["DJANGO_ALLOWED_HOSTS"] = "yourname.pythonanywhere.com"
    ```
-6. 执行 `python manage.py migrate` 和 `python manage.py collectstatic`，然后 Reload。
-7. 前端 `REACT_APP_API_URL=https://yourname.pythonanywhere.com/api npm run build`，把 `build` 文件夹拖到 Netlify。
-8. 回到 PythonAnywhere，把 Netlify 地址加进 `DJANGO_CORS_ORIGINS`，Reload。
+6. Run `python manage.py migrate` and `python manage.py collectstatic`, then Reload.
+7. Build the frontend with `REACT_APP_API_URL=https://yourname.pythonanywhere.com/api npm run build`
+   and drag the `build` folder into Netlify.
+8. Back on PythonAnywhere, add the Netlify URL to `DJANGO_CORS_ORIGINS` and Reload.
 
-## 常见问题
+## Troubleshooting
 
-- **登录失败 / 提示 “wrong username or password”，但密码没错**：多半是前端换了端口。3000 被占用时 CRA 会自动用 3001、3002……，而旧的白名单只写了 3000，浏览器会因跨域拿不到响应。`DEBUG=True` 时后端已放行 `localhost` / `127.0.0.1` 的任意端口；部署环境请显式配置 `DJANGO_CORS_ORIGINS`。
-- **登录 404**：确认后端地址与 `/api/api-token-auth/` 一致，且 `runserver` 已启动。
-- **浏览器控制台 CORS 报错**：把前端地址加入 `DJANGO_CORS_ORIGINS`。
-- **接口 401**：请求头缺少 `Authorization: Token <token>`，或 token 已被删除。
-- **看不到别人（或后台新建）的任务**：任务按 `owner` 隔离，只会返回当前登录用户自己的数据。
+- **Login fails with "wrong username or password" even though the password is right.**
+  The frontend probably moved to another port. When 3000 is taken, CRA falls back to
+  3001, 3002, and so on, while the whitelist only listed 3000 — the browser then blocks
+  the request and it looks like bad credentials. With `DEBUG=True` the backend now allows
+  any `localhost` / `127.0.0.1` port; in production configure `DJANGO_CORS_ORIGINS` explicitly.
+- **Login returns 404.** Make sure the API base URL ends with `/api` and that
+  `/api/api-token-auth/` is correct, and that `runserver` is actually running.
+- **CORS error in the browser console.** Add the frontend origin to `DJANGO_CORS_ORIGINS`.
+- **API returns 401.** The `Authorization: Token <token>` header is missing, or the token
+  was deleted.
+- **You cannot see todos created by others (or in the admin).** Todos are isolated by
+  `owner`: the API only returns rows belonging to the logged-in user.
