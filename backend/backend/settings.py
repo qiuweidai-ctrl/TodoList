@@ -1,13 +1,61 @@
+"""Django settings for the TodoList backend.
+
+所有与环境相关的东西（密钥、调试开关、域名、跨域白名单）都从环境变量读取，
+本地开发有安全的默认值，部署到 PythonAnywhere 时不需要改代码，只设环境变量即可。
+
+除了真正的环境变量，也支持项目根目录下的 backend/.env 文件（KEY=VALUE 每行一条），
+这样本地不用每次都 set 环境变量，.env 已被 .gitignore 忽略。
+"""
+
 import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 
-DEBUG = True
+def _load_dotenv(path):
+    """极简 .env 读取（不依赖 python-dotenv）。已存在的环境变量优先。"""
+    if not path.exists():
+        return
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key and key not in os.environ:
+            os.environ[key] = value
 
-ALLOWED_HOSTS = []
+
+_load_dotenv(BASE_DIR / ".env")
+
+
+def env_bool(name, default=False):
+    """把 '1'/'true'/'yes'/'on' 解析成 True。"""
+    return os.environ.get(name, str(default)).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def env_list(name, default=""):
+    """逗号分隔的环境变量 -> 列表。"""
+    return [item.strip() for item in os.environ.get(name, default).split(",") if item.strip()]
+
+
+# --------------------------------------------------------------------------
+# 安全相关：部署前务必设置 DJANGO_SECRET_KEY 与 DJANGO_DEBUG=False
+# --------------------------------------------------------------------------
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-dev-only-key-please-change-before-deploying",
+)
+
+DEBUG = env_bool("DJANGO_DEBUG", True)
+
+# 本地默认只允许 127.0.0.1 / localhost；
+# 部署到 PythonAnywhere 时设置 DJANGO_ALLOWED_HOSTS=yourname.pythonanywhere.com
+ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost,[::1]")
+
+CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -22,7 +70,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
 
-    # 自己的app
+    # 自己的 app
     'todo',
     'api',
 ]
@@ -43,7 +91,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -86,9 +134,12 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # collectstatic 的输出目录（部署用）
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# DRF 配置（Token认证）
+# --------------------------------------------------------------------------
+# DRF / CORS
+# --------------------------------------------------------------------------
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
@@ -96,8 +147,8 @@ REST_FRAMEWORK = {
     ],
 }
 
-# CORS 允许前端localhost:3000跨域
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
+# 允许跨域访问 API 的前端地址（本地 3000 端口，部署时用环境变量追加）
+CORS_ALLOWED_ORIGINS = env_list(
+    "DJANGO_CORS_ORIGINS",
+    "http://localhost:3000,http://127.0.0.1:3000",
+)

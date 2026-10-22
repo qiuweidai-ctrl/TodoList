@@ -22,3 +22,10 @@ Thumbs.db
 
 # 日志
 *.log
+# 环境变量文件（保留 .env.example 模板）
+.env
+backend/.env
+frontend/.env
+
+# collectstatic 输出
+backend/staticfiles/
