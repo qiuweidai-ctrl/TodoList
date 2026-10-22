@@ -3,7 +3,7 @@
 Django REST Framework + React 的全栈任务管理应用（Practical 1–14 的完整项目）。
 
 - 后端：Django + DRF，Token 认证，SQLite
-- 前端：React 19 + React Router + React-Bootstrap + Axios
+- 前端：React 18 + React Router 6 + React-Bootstrap + Axios
 
 ## 目录结构
 
