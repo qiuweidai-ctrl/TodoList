@@ -1,27 +1,25 @@
-from django.shortcuts import render
-from rest_framework import generics, permissions
-from .serializers import TodoSerializer
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+# ✅ 关键！补上这一行导入action
+from rest_framework.decorators import action
 from todo.models import Todo
+from .serializers import TodoSerializer
 
 
-class TodoListCreate(generics.ListCreateAPIView):
+class TodoViewSet(viewsets.ModelViewSet):
     serializer_class = TodoSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        user = self.request.user
-        return Todo.objects.filter(user=user).order_by('-created_at')
+        return Todo.objects.filter(owner=self.request.user)
 
-    # 创建任务时自动绑定当前登录用户，解决 IntegrityError NOT NULL user_id
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        serializer.save(owner=self.request.user)
 
-
-# 单条：获取、修改、删除 RetrieveUpdateDestroyAPIView
-class TodoRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = TodoSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-        return Todo.objects.filter(user=user)
+    @action(detail=True, methods=['patch'])
+    def complete(self, request, pk=None):
+        todo = self.get_object()
+        todo.is_completed = not todo.is_completed
+        todo.save()
+        return Response(TodoSerializer(todo).data)
