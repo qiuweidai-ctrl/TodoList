@@ -29,3 +29,6 @@ frontend/.env
 
 # collectstatic 输出
 backend/staticfiles/
+
+# 指向线上后端的前端部署产物（拖到 Netlify 用，由 npm run build 生成）
+frontend-deploy/
