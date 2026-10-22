@@ -1,9 +1,19 @@
 # TodoList
 
-Django REST Framework + React 的全栈任务管理应用（Practical 1–14 的完整项目）。
+Django REST Framework + React 的全栈任务管理应用（Practical 1–17 的完整项目）。
 
 - 后端：Django + DRF，Token 认证，SQLite
 - 前端：React 18 + React Router 6 + React-Bootstrap + Axios
+
+## 线上地址
+
+| 部分 | 地址 |
+| --- | --- |
+| 前端（Netlify） | https://venerable-entremet-f4ed6f.netlify.app |
+| 后端（PythonAnywhere） | https://qiuweidai.pythonanywhere.com |
+| 后台管理 | https://qiuweidai.pythonanywhere.com/admin/ |
+
+部署步骤见 [DEPLOY.md](DEPLOY.md)。
 
 ## 目录结构
 
