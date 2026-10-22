@@ -1,0 +1,5 @@
+# SPA fallback for Netlify (single-page app).
+# /login, /add and /todos/:id have no files on the server, so every path falls
+# back to index.html and React Router takes over. Without this, deep links 404.
+# CRA copies this file into build/, so drag-and-drop deploys pick it up.
+/*    /index.html   200

@@ -97,7 +97,11 @@ npm run build                       # 生产构建
 
 前端 API 地址通过 `REACT_APP_API_URL` 配置（参考 `frontend/.env.example`），不设置时默认 `http://127.0.0.1:8000/api`。
 
-## 部署到 PythonAnywhere（Practical 13–14）
+## 部署（Practical 13–17）
+
+完整的部署步骤（PythonAnywhere 后端 + Netlify 前端 + CORS 打通）见 **[DEPLOY.md](DEPLOY.md)**。
+
+速览：
 
 1. 代码推到 GitHub（本仓库）。
 2. PythonAnywhere Bash 里 `git clone` 仓库，创建 virtualenv 并 `pip install -r backend/requirements.txt`。
@@ -110,6 +114,8 @@ npm run build                       # 生产构建
    os.environ["DJANGO_ALLOWED_HOSTS"] = "yourname.pythonanywhere.com"
    ```
 6. 执行 `python manage.py migrate` 和 `python manage.py collectstatic`，然后 Reload。
+7. 前端 `REACT_APP_API_URL=https://yourname.pythonanywhere.com/api npm run build`，把 `build` 文件夹拖到 Netlify。
+8. 回到 PythonAnywhere，把 Netlify 地址加进 `DJANGO_CORS_ORIGINS`，Reload。
 
 ## 常见问题
 
