@@ -4,6 +4,8 @@ import { Card, Container, Button, Alert } from "react-bootstrap";
 import moment from "moment";
 
 import TodoDataService from "../services/todos";
+import Seo from "./seo";
+import { slugify } from "../utils/slug";
 
 const TodosList = (props) => {
   const [todos, setTodos] = useState([]);
@@ -43,15 +45,28 @@ const TodosList = (props) => {
 
   if (!props.token) {
     return (
-      <Alert variant="warning">
-        You are not logged in. Please <Link to="/login">login</Link> to see your
-        todos.
-      </Alert>
+      <>
+        <Seo
+          title="Sign in to your todo list"
+          description="Log in to Todo App to manage your tasks: add, complete and delete todos from any browser."
+          path="/"
+        />
+        <Alert variant="warning">
+          You are not logged in. Please <Link to="/login">login</Link> to see your
+          todos.
+        </Alert>
+      </>
     );
   }
 
   return (
     <Container>
+      <Seo
+        title="My tasks"
+        description="Your personal task list: everything you added, with memo, creation date and completion status."
+        path="/"
+      />
+
       <Link to="/add">
         <Button variant="outline-info" className="mb-3">
           Add To-do
@@ -77,7 +92,9 @@ const TodosList = (props) => {
             </div>
 
             {!todo.is_completed && (
-              <Link to={"/todos/" + todo.id}>
+              /* Practical 18, Step 3: readable URL with a slug, e.g.
+                 /todos/12/buy-oat-milk instead of /todos/12 */
+              <Link to={`/todos/${todo.id}/${slugify(todo.title)}`}>
                 <Button variant="outline-info" className="me-2">
                   Edit
                 </Button>

@@ -3,8 +3,11 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { Card, Form, Button, Container, Alert } from "react-bootstrap";
 
 import TodoDataService from "../services/todos";
+import Seo from "./seo";
 
-// 编辑页：直接用 URL 里的 id 去后端取数据，刷新页面也不会丢
+// 编辑页：直接用 URL 里的 id 去后端取数据，刷新页面也不会丢。
+// Practical 18, Step 3: the URL may also carry a slug (/todos/12/buy-oat-milk);
+// the slug is cosmetic, we only query by id.
 const Todo = (props) => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -44,15 +47,33 @@ const Todo = (props) => {
   };
 
   if (error) {
-    return <Alert variant="danger">{error}</Alert>;
+    return (
+      <>
+        <Seo title="Task not found" path={`/todos/${id}`} noIndex />
+        <Alert variant="danger">{error}</Alert>
+      </>
+    );
   }
 
   if (!todo) {
-    return <p>Loading...</p>;
+    return (
+      <>
+        <Seo title="Loading task…" path={`/todos/${id}`} noIndex />
+        <p>Loading...</p>
+      </>
+    );
   }
 
   return (
     <Container className="mt-4" style={{ maxWidth: "600px" }}>
+      {/* Step 4: the title is generated from the task itself */}
+      <Seo
+        title={todo.title}
+        description={`Edit “${todo.title}” in Todo App: update the memo or mark it as completed.`}
+        path={`/todos/${todo.id}`}
+        type="article"
+        noIndex
+      />
       <Card>
         <Card.Body>
           <h4 className="mb-3">Edit Todo</h4>

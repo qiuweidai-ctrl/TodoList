@@ -1,3 +1,11 @@
+# robots.txt — read by search engine crawlers (Practical 18, Step 1)
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Allow: /
+
+# Pages that require a login are not useful in search results
+Disallow: /add
+Disallow: /todos/
+
+# Absolute URL of the sitemap (update it if the site domain changes)
+Sitemap: https://venerable-entremet-f4ed6f.netlify.app/sitemap.xml

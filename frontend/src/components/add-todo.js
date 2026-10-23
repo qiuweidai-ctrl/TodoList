@@ -3,8 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { Card, Form, Button, Container } from "react-bootstrap";
 
 import TodoDataService from "../services/todos";
+import Seo from "./seo";
 
-// 新增任务页
+// 新增任务页（私有页面：不索引）
 const AddTodo = (props) => {
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
@@ -30,6 +31,12 @@ const AddTodo = (props) => {
 
   return (
     <Container style={{ maxWidth: "600px" }}>
+      <Seo
+        title="Add a task"
+        description="Create a new task with a title and an optional memo."
+        path="/add"
+        noIndex
+      />
       <Card className="p-4 mt-4">
         <h3 className="mb-3">Add Todo</h3>
         <Form onSubmit={saveTodo}>

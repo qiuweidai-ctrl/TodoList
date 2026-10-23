@@ -4,6 +4,8 @@ import Container from "react-bootstrap/Container";
 import Button from "react-bootstrap/Button";
 import { useNavigate } from "react-router-dom";
 
+import Seo from "./seo";
+
 // 登录页：调用 App 传下来的 login(username, password)
 const Login = (props) => {
   const navigate = useNavigate();
@@ -20,6 +22,11 @@ const Login = (props) => {
 
   return (
     <Container style={{ maxWidth: "420px", marginTop: "3rem" }}>
+      <Seo
+        title="Login"
+        description="Sign in to Todo App with your username and password to open your task list."
+        path="/login"
+      />
       <h2 className="mb-4">Login</h2>
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3" controlId="loginUsername">

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Static sitemap for the public pages of the Todo App (Practical 18, Step 5).
+  The app itself is a single-page React application, so the routes are listed
+  here explicitly. Private pages (/add, /todos/:id) are excluded on purpose:
+  they need a token and would only return the login form to a crawler.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://venerable-entremet-f4ed6f.netlify.app/</loc>
+    <lastmod>2026-10-23</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://venerable-entremet-f4ed6f.netlify.app/login</loc>
+    <lastmod>2026-10-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://venerable-entremet-f4ed6f.netlify.app/signup</loc>
+    <lastmod>2026-10-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+</urlset>

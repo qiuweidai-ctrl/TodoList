@@ -7,6 +7,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { Container, Nav, Navbar, Button } from "react-bootstrap";
+import { HelmetProvider } from "react-helmet-async";
 
 import TodoDataService, { API_URL } from "./services/todos";
 import Login from "./components/login";
@@ -14,6 +15,7 @@ import Signup from "./components/signup";
 import TodosList from "./components/todos-list";
 import AddTodo from "./components/add-todo";
 import Todo from "./components/todo";
+import Footer from "./components/footer";
 
 function App() {
   // token 存在 localStorage，刷新页面不会掉登录
@@ -23,9 +25,8 @@ function App() {
   // 请求根本没到后端（后端没启动、地址错、或被 CORS 拦下）时给一条可操作的提示
   const networkHint = (action) =>
     `${action} failed: cannot reach the backend at ${API_URL}\n\n` +
-    `1) Is "python manage.py runserver" running?\n` +
-    `2) Is ${window.location.origin} allowed by CORS?\n` +
-    `   (the dev server allows any localhost port when DEBUG=True)`;
+    `1) Is the backend reachable and running?\n` +
+    `2) Is ${window.location.origin} allowed by CORS?`;
 
   const login = async (user, password) => {
     try {
@@ -76,58 +77,64 @@ function App() {
   };
 
   return (
-    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <Navbar bg="dark" variant="dark" expand="lg">
-        <Container>
-          <Navbar.Brand as={Link} to="/">
-            Todo App
-          </Navbar.Brand>
-          <Navbar.Toggle />
-          <Navbar.Collapse>
-            <Nav className="ms-auto align-items-center">
-              {token ? (
-                <>
-                  <Nav.Link as={Link} to="/">Home</Nav.Link>
-                  <Nav.Link as={Link} to="/add">Add Task</Nav.Link>
-                  <Navbar.Text className="mx-3">{username}</Navbar.Text>
-                  <Button variant="outline-light" size="sm" onClick={logout}>
-                    Logout
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Nav.Link as={Link} to="/login">Login</Nav.Link>
-                  <Nav.Link as={Link} to="/signup">Sign up</Nav.Link>
-                </>
-              )}
-            </Nav>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
+    <HelmetProvider>
+      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Navbar bg="dark" variant="dark" expand="lg">
+          <Container>
+            <Navbar.Brand as={Link} to="/">
+              Todo App
+            </Navbar.Brand>
+            <Navbar.Toggle />
+            <Navbar.Collapse>
+              <Nav className="ms-auto align-items-center">
+                {token ? (
+                  <>
+                    <Nav.Link as={Link} to="/">Home</Nav.Link>
+                    <Nav.Link as={Link} to="/add">Add Task</Nav.Link>
+                    <Navbar.Text className="mx-3">{username}</Navbar.Text>
+                    <Button variant="outline-light" size="sm" onClick={logout}>
+                      Logout
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Nav.Link as={Link} to="/login">Login</Nav.Link>
+                    <Nav.Link as={Link} to="/signup">Sign up</Nav.Link>
+                  </>
+                )}
+              </Nav>
+            </Navbar.Collapse>
+          </Container>
+        </Navbar>
 
-      <Container className="mt-4">
-        <Routes>
-          <Route
-            path="/login"
-            element={token ? <Navigate to="/" replace /> : <Login login={login} />}
-          />
-          <Route
-            path="/signup"
-            element={token ? <Navigate to="/" replace /> : <Signup signup={signup} />}
-          />
-          <Route path="/" element={<TodosList token={token} />} />
-          <Route
-            path="/add"
-            element={token ? <AddTodo token={token} /> : <Navigate to="/login" replace />}
-          />
-          <Route
-            path="/todos/:id"
-            element={token ? <Todo token={token} /> : <Navigate to="/login" replace />}
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Container>
-    </Router>
+        <Container className="mt-4">
+          <Routes>
+            <Route
+              path="/login"
+              element={token ? <Navigate to="/" replace /> : <Login login={login} />}
+            />
+            <Route
+              path="/signup"
+              element={token ? <Navigate to="/" replace /> : <Signup signup={signup} />}
+            />
+            <Route path="/" element={<TodosList token={token} />} />
+            <Route
+              path="/add"
+              element={token ? <AddTodo token={token} /> : <Navigate to="/login" replace />}
+            />
+            {/* Practical 18, Step 3: the optional :slug segment gives readable URLs
+                such as /todos/12/buy-oat-milk — the id is still what we query. */}
+            <Route
+              path="/todos/:id/:slug?"
+              element={token ? <Todo token={token} /> : <Navigate to="/login" replace />}
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Container>
+
+        <Footer />
+      </Router>
+    </HelmetProvider>
   );
 }
 
